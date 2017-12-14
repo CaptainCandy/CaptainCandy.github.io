@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>计网作业唐鑫泽 3150101812</title>
+    <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main1119.css"/>
+    <style>
+        input[type="text"] {
+            height: 25px;
+            outline: none;
+            border: 0;
+            border: 1px solid #CCCCCC;
+            padding: 0 4px;
+        }
+		        .info-title{
+            color: white;
+            font-size: 14px;
+            background-color: blue;
+            line-height: 26px;
+            padding: 0px 0 0 6px;
+            font-weight: lighter;
+            letter-spacing: 1px
+        }
+        .info-content{
+            padding: 4px;
+            color: #666666;
+            line-height: 23px;
+            font: 12px Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial;
+        }
+        .info-content img{
+            float: left;
+            margin: 3px;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=1.4.2&key=cf836fab3cdee2f441a41c6504c81234&plugin=AMap.Autocomplete,AMap.PlaceSearch,AMap.AdvancedInfoWindow"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+</head>
+<body>
+<div id="container"></div>
+<div id="tip">鼠标点击热点试试</div>
+<div id="myPageTop">
+    <table>
+        <tr>
+            <td>
+                <label>输入关键字查询：</label>
+            </td>
+            <td class="column2">
+                <label>输入城市名：</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input id="tipinput"/>
+            </td>
+            <td class="column2">
+                <input id="cityName" class="inputtext" placeholder="请输入城市的名称" type="text"/>
+            </td>
+			<td class="column3">
+				<input id="query" class="button" value="到指定的城市" type="button"/>
+			</td>
+        </tr>
+		<tr>
+			<td>
+				<input id="en" type="button" class="button" value="显示英文底图" />
+			</td>
+			<td class="column2">
+				<input id="zh_en" type="button" class="button" value="显示中英文对照底图" />
+			</td>
+			<td class="column3">
+				<input id="zh_cn" type="button" class="button" value="显示中文底图" />
+			</td>
+		</tr>
+    </table>
+</div>
+
+
+<script>
+	//实现选择城市
+    var map = new AMap.Map('container', {
+        resizeEnable: true
+    });
+		//设置城市
+    AMap.event.addDomListener(document.getElementById('query'), 'click', function() {
+        var cityName = document.getElementById('cityName').value;
+        if (!cityName) {
+            cityName = '北京市';
+        }
+        map.setCity(cityName);
+    });
+	//实现鼠标点击获取经纬度
+	/*var map = new AMap.Map("container", {
+        resizeEnable: true
+    });
+		//为地图注册click事件获取鼠标点击出的经纬度坐标
+    var clickEventListener = map.on('click', function(e) {
+        document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat()
+    });
+    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+    function select(e) {
+        if (e.poi && e.poi.location) {
+            map.setZoom(15);
+            map.setCenter(e.poi.location);
+        }
+    }*/
+	//显示中英文地图
+	 var map = new AMap.Map('container', {
+      center: [121.498586, 31.239637]
+    });
+    
+    ['en', 'zh_en', 'zh_cn'].forEach(function(btn) {
+      var button = document.getElementById(btn);
+      AMap.event.addDomListener(button,'click',clickListener)
+    });
+
+    function clickListener() {
+        map.setLang(this.id);
+    }
+	//实现点击地点出现信息
+	var map = new AMap.Map('container', {
+        resizeEnable: true,
+        center: [116.397428, 39.90923],
+        zoom: 13,
+        isHotspot: true
+    });
+    var placeSearch = new AMap.PlaceSearch();  //构造地点查询类
+    var infoWindow=new AMap.AdvancedInfoWindow({});
+    map.on('hotspotclick', function(result) {
+        placeSearch.getDetails(result.id, function(status, result) {
+            if (status === 'complete' && result.info === 'OK') {
+                placeSearch_CallBack(result);
+            }
+        });
+    });
+		//回调函数
+    function placeSearch_CallBack(data) { //infoWindow.open(map, result.lnglat);
+        var poiArr = data.poiList.pois;
+        var location = poiArr[0].location;
+        infoWindow.setContent(createContent(poiArr[0]));
+        infoWindow.open(map,location);
+    }
+    function createContent(poi) {  //信息窗体内容
+        var s = [];
+        s.push('<div class="info-title">'+poi.name+'</div><div class="info-content">'+"地址：" + poi.address);
+        s.push("电话：" + poi.tel);
+        s.push("类型：" + poi.type);
+        s.push('<div>');
+        return s.join("<br>");
+    }
+	//输入提示后查询
+		//输入提示
+    var autoOptions = {
+        input: "tipinput"
+    };
+    var auto = new AMap.Autocomplete(autoOptions);
+    var placeSearch = new AMap.PlaceSearch({
+        map: map
+    });  //构造地点查询类
+    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+    function select(e) {
+        placeSearch.setCity(e.poi.adcode);
+        placeSearch.search(e.poi.name);  //关键字查询查询
+    }
+</script>
+</body>
+</html>
