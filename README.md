@@ -1,4 +1,3 @@
 # CaptainCandy.github.io
-MyPages
 
-A simple practise of AMap API.
+Push some convenient dispaly pages for my projects. 
